@@ -46,6 +46,7 @@ var createTaskEl = function (taskDataObj) {
     listItemEl.className = "task-item";
     
     listItemEl.setAttribute("data-task-id", taskIdCounter);
+    listItemEl.setAttribute("draggable", "true");
 
     var taskInfoEl = document.createElement("div");
     taskInfoEl.className = "task-info";
@@ -163,11 +164,58 @@ var taskStatusChangeHandler = function(event) {
     else if (statusValue === "completed") {
         tasksCompletedEl.appendChild(taskSelected);
     }
+}
 
-    console.log(event.target);
-    console.log(event.target.getAttribute("data-task-id"));
+var dragTaskHandler = function(event) {
+    var taskId = event.target.getAttribute("data-task-id");
+    event.dataTransfer.setData("text/plain", taskId);
+    
+    var getId = event.dataTransfer.getData("text/plain");
+    console.log("getId:", getId, typeof getId);
+}
+
+var dropZoneHandler = function(event) {
+    var taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+      event.preventDefault();
+      taskListEl.setAttribute("style", "background: rgba(68, 233, 255, 0.7); border-style: dashed;");
+    }
+  };
+
+var dropTaskHandler = function(event) {
+    var id = event.dataTransfer.getData("text/plain");
+
+    var draggableElement = document.querySelector("[data-task-id='" + id + "']");
+
+    var dropZoneEl = event.target.closest(".task-list");
+    var statusType = dropZoneEl.id;
+
+    var statusSelectEl = draggableElement.querySelector("select[name='status-change']");
+
+    if (statusType === "tasks-to-do") {
+        statusSelectEl.selectedIndex = 0;
+    } 
+    else if (statusType === "tasks-in-progress") {
+    statusSelectEl.selectedIndex = 1;
+    } 
+    else if (statusType === "completed-tasks") {
+    statusSelectEl.selectedIndex = 2;
+    }
+    
+    dropZoneEl.removeAttribute("style");
+    dropZoneEl.appendChild(draggableElement);
+}
+
+var dragLeaveHandler = function(event) {
+    var taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+    taskListEl.removeAttribute("style");
+    }
 }
 
 pageContentEl.addEventListener("click", taskButtonHandler);
-
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+pageContentEl.addEventListener("dragstart", dragTaskHandler);
+pageContentEl.addEventListener("dragover", dropZoneHandler);
+pageContentEl.addEventListener("drop", dropTaskHandler);
+pageContentEl.addEventListener("dragleave", dragLeaveHandler);
