@@ -70,8 +70,6 @@ var createTaskEl = function (taskDataObj) {
 
     taskIdCounter++;
 
-    console.log(taskDataObj);
-    console.log(taskDataObj.status);
 };
 
 var createTaskActions = function(taskId) {
@@ -134,10 +132,8 @@ var editTask = function(taskId) {
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
     var taskName = document.querySelector("h3.task-name").textContent;
-    console.log(taskName);
 
     var taskType = taskSelected.querySelector("span.task-type").textContent;
-    console.log(taskType);
 
     document.querySelector("input[name='task-name']").value = taskName;
     document.querySelector("select[name='task-type']").value = taskType;
@@ -205,7 +201,6 @@ var taskStatusChangeHandler = function(event) {
         }
     }
 
-    console.log(tasks);
 
     saveTasks()
 }
@@ -215,7 +210,6 @@ var dragTaskHandler = function(event) {
     event.dataTransfer.setData("text/plain", taskId);
     
     var getId = event.dataTransfer.getData("text/plain");
-    console.log("getId:", getId, typeof getId);
 }
 
 var dropZoneHandler = function(event) {
@@ -257,7 +251,6 @@ var dropTaskHandler = function(event) {
 
     saveTasks()
     
-    console.log(tasks);
 }
 
 var dragLeaveHandler = function(event) {
@@ -271,9 +264,28 @@ var saveTasks = function() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+var loadTasks = function() {
+    var savedTasks = localStorage.getItem("tasks");
+    
+    if (!savedTasks) {
+        return false;
+    }
+    
+    savedTasks = JSON.parse(savedTasks);
+
+    for (var i = 0; i < savedTasks.length; i++) {
+        
+        createTaskEl(savedTasks[i]);
+    } 
+
+}
+
+
 pageContentEl.addEventListener("click", taskButtonHandler);
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
 pageContentEl.addEventListener("dragstart", dragTaskHandler);
 pageContentEl.addEventListener("dragover", dropZoneHandler);
 pageContentEl.addEventListener("drop", dropTaskHandler);
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
+
+loadTasks()
